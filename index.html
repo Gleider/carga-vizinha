@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Carga Vizinha · Recarga noturna para motoristas de app</title>
+<meta name="description" content="Deixe seu carro elétrico numa garagem verificada perto de casa às 22h e retire às 6h com 100% de bateria. Mais barato que o posto rápido e sem perder horas de trabalho.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Carga Vizinha: durma e acorde com 100% de bateria">
+<meta property="og:description" content="Recarga noturna perto de casa para motoristas de app com carro elétrico. Entre na lista de espera.">
+<meta name="theme-color" content="#101A36">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23101A36'/%3E%3Cpath d='M18 4 8 18h7l-2 10 11-15h-7z' fill='%23FFC233'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{
+  --night:#101A36;
+  --night-2:#18244A;
+  --night-line:#2A3866;
+  --star:#C9D3EE;
+  --volt:#FFC233;
+  --volt-deep:#E8A200;
+  --paper:#F4F6FB;
+  --card:#FFFFFF;
+  --ink:#16203A;
+  --ink-2:#4A5570;
+  --line:#DCE1EC;
+  --ok:#2E8A5C;
+  --err:#B42318;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:17px;line-height:1.55}
+h1,h2,h3{font-family:Sora,system-ui,sans-serif;line-height:1.15;margin:0;text-wrap:balance}
+p{margin:0}
+a{color:inherit}
+.container{max-width:1120px;margin-inline:auto;padding-inline:20px}
+.label{font-family:Sora,sans-serif;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:Sora,sans-serif;font-weight:600;font-size:16px;padding:14px 22px;border-radius:999px;border:0;cursor:pointer;text-decoration:none;transition:transform .15s ease,background .15s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--volt);outline-offset:2px}
+.btn-volt{background:var(--volt);color:var(--night)}
+.btn-volt:hover{background:#FFD15C}
+.btn-ghost{background:transparent;color:#fff;border:1.5px solid var(--night-line)}
+section{padding-block:72px}
+
+/* Header + hero */
+.hero{background:var(--night);color:#fff;position:relative;overflow:hidden;padding-block:0 80px}
+.hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(1.5px 1.5px at 12% 22%,var(--star) 50%,transparent 51%),radial-gradient(1px 1px at 28% 68%,var(--star) 50%,transparent 51%),radial-gradient(1.5px 1.5px at 46% 14%,var(--star) 50%,transparent 51%),radial-gradient(1px 1px at 63% 40%,var(--star) 50%,transparent 51%),radial-gradient(1.5px 1.5px at 82% 18%,var(--star) 50%,transparent 51%),radial-gradient(1px 1px at 91% 62%,var(--star) 50%,transparent 51%),radial-gradient(1px 1px at 6% 84%,var(--star) 50%,transparent 51%);opacity:.55;pointer-events:none}
+nav{display:flex;justify-content:space-between;align-items:center;padding-block:20px;position:relative}
+.logo{display:flex;align-items:center;gap:10px;font-family:Sora,sans-serif;font-weight:700;font-size:20px;text-decoration:none}
+.logo svg{width:30px;height:30px}
+.logo b{color:var(--volt);font-weight:700}
+nav .btn{padding:10px 18px;font-size:14px}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center;padding-top:40px;position:relative}
+.hero .label{color:var(--volt)}
+.hero h1{font-size:clamp(36px,5.6vw,60px);font-weight:700;letter-spacing:-.02em;margin-top:14px}
+.hero h1 em{font-style:normal;color:var(--volt)}
+.hero .lead{font-size:20px;color:var(--star);margin-top:20px;max-width:34ch}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.hero-note{font-size:14px;color:var(--star);margin-top:14px;opacity:.85}
+
+.night-card{background:var(--night-2);border:1px solid var(--night-line);border-radius:20px;padding:26px;display:flex;flex-direction:column;gap:20px}
+.night-card .row{display:flex;justify-content:space-between;align-items:baseline;font-family:Sora,sans-serif}
+.night-card .time{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums}
+.night-card .pct{font-size:14px;color:var(--star)}
+.bat{height:56px;border:3px solid #fff;border-radius:12px;padding:5px;position:relative;margin-right:10px}
+.bat::after{content:"";position:absolute;right:-11px;top:15px;width:7px;height:20px;background:#fff;border-radius:0 4px 4px 0}
+.bat-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--volt-deep),var(--volt));width:100%;transform-origin:left;animation:charge 4s ease-out both}
+@keyframes charge{from{transform:scaleX(.15)}to{transform:scaleX(1)}}
+.timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;font-size:14px;color:var(--star)}
+.timeline div{border-top:2px solid var(--night-line);padding-top:10px}
+.timeline b{display:block;color:#fff;font-family:Sora,sans-serif;font-size:15px}
+
+/* Problem */
+.sec-head{max-width:640px;display:flex;flex-direction:column;gap:12px;margin-bottom:40px}
+.sec-head .label{color:var(--volt-deep)}
+.sec-head h2{font-size:clamp(28px,3.6vw,40px);font-weight:700;letter-spacing:-.01em}
+.sec-head p{color:var(--ink-2);font-size:18px}
+.pains{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.pain{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;gap:10px}
+.pain .big{font-family:Sora,sans-serif;font-size:34px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.pain h3{font-size:18px}
+.pain p{color:var(--ink-2)}
+
+/* How */
+.how{background:var(--card);border-block:1px solid var(--line)}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;counter-reset:s}
+.step{display:flex;flex-direction:column;gap:12px}
+.step .n{width:44px;height:44px;border-radius:50%;background:var(--night);color:var(--volt);display:grid;place-items:center;font-family:Sora,sans-serif;font-weight:700}
+.step h3{font-size:20px}
+.step p{color:var(--ink-2)}
+
+/* Savings */
+.save-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.bars{display:flex;flex-direction:column;gap:18px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px}
+.bar-row{display:flex;flex-direction:column;gap:6px}
+.bar-row .top{display:flex;justify-content:space-between;font-weight:600}
+.bar-row .top span:last-child{font-family:Sora,sans-serif;font-variant-numeric:tabular-nums}
+.bar{height:14px;border-radius:999px;background:var(--paper);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px}
+.bar .posto{width:100%;background:#9AA4BD}
+.bar .cv{width:68%;background:var(--volt-deep)}
+.fine{font-size:13px;color:var(--ink-2)}
+.checks{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:14px}
+.checks li{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start}
+.checks svg{width:22px;height:22px;color:var(--ok);margin-top:2px}
+.checks b{font-weight:700}
+
+/* Trust */
+.trust{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.trust .pain h3{display:flex;gap:10px;align-items:center}
+.trust svg{width:22px;height:22px;color:var(--volt-deep);flex:none}
+.abroad{margin-top:28px;background:var(--night);color:#fff;border-radius:var(--radius);padding:24px 28px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.abroad p{color:var(--star);flex:1 1 320px}
+.abroad strong{color:#fff}
+
+/* Host */
+.host{background:var(--night);color:#fff}
+.host-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.host .label{color:var(--volt)}
+.host h2{font-size:clamp(28px,3.6vw,40px);margin-top:12px}
+.host p{color:var(--star);margin-top:14px;font-size:18px}
+.host .earn{background:var(--night-2);border:1px solid var(--night-line);border-radius:var(--radius);padding:26px;display:flex;flex-direction:column;gap:6px}
+.host .earn .big{font-family:Sora,sans-serif;font-size:44px;font-weight:700;color:var(--volt);font-variant-numeric:tabular-nums}
+.host .earn span{color:var(--star);font-size:15px}
+
+/* Form */
+.form-wrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:48px;align-items:start}
+.form-card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px;box-shadow:0 12px 40px rgba(16,26,54,.08)}
+form{display:flex;flex-direction:column;gap:18px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label,.field legend{font-weight:600;font-size:15px}
+.field .opt{font-weight:400;color:var(--ink-2)}
+input[type=text],input[type=email],input[type=tel],select{font:inherit;font-size:16px;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);width:100%}
+input:focus,select:focus{border-color:var(--night)}
+fieldset{border:0;padding:0;margin:0}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.choice{position:relative}
+.choice input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.choice span{display:flex;flex-direction:column;gap:2px;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;height:100%}
+.choice span small{color:var(--ink-2);font-size:13px}
+.choice input:checked + span{border-color:var(--night);background:#EEF1F8;box-shadow:inset 0 0 0 1px var(--night)}
+.choice input:focus-visible + span{outline:3px solid var(--volt);outline-offset:2px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.consent{display:grid;grid-template-columns:22px 1fr;gap:10px;font-size:14px;color:var(--ink-2);align-items:start}
+.consent input{width:18px;height:18px;margin-top:2px}
+.hp{position:absolute;left:-9999px}
+form .btn{width:100%;padding:16px}
+.form-msg{border-radius:10px;padding:12px 14px;font-size:15px}
+.form-msg.err{background:#FDECEA;color:var(--err)}
+.success{display:flex;flex-direction:column;gap:12px;text-align:center;align-items:center;padding-block:24px}
+.success svg{width:56px;height:56px;color:var(--ok)}
+.success h3{font-size:24px}
+.success p{color:var(--ink-2)}
+.perks{display:flex;flex-direction:column;gap:14px;margin-top:24px}
+
+/* FAQ */
+.faq{max-width:760px;display:flex;flex-direction:column;gap:12px}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px}
+summary{cursor:pointer;font-family:Sora,sans-serif;font-weight:600;font-size:16px}
+details p{color:var(--ink-2);margin-top:10px}
+
+footer{background:var(--night);color:var(--star);padding-block:32px;font-size:14px}
+footer .container{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+@media (max-width:880px){
+  .hero-grid,.save-grid,.host-grid,.form-wrap{grid-template-columns:1fr;gap:32px}
+  .pains,.steps,.trust{grid-template-columns:1fr}
+  section{padding-block:56px}
+}
+@media (max-width:480px){
+  .choices,.two{grid-template-columns:1fr}
+  nav .btn{display:none}
+  .form-card{padding:20px}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="container">
+    <nav>
+      <a class="logo" href="#">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#18244A"/><path d="M18 4 8 18h7l-2 10 11-15h-7z" fill="#FFC233"/></svg>
+        <span>Carga <b>Vizinha</b></span>
+      </a>
+      <a class="btn btn-volt" href="#lista" data-cta="nav">Entrar na lista</a>
+    </nav>
+
+    <div class="hero-grid">
+      <div>
+        <span class="label">Para motoristas de app com carro elétrico</span>
+        <h1 id="headline">Durma tranquilo. Seu carro acorda com <em>100%</em>.</h1>
+        <p class="lead">Deixe o carro numa garagem verificada perto de casa às 22h e retire às 6h com a bateria cheia. Mais barato que o posto rápido e sem perder horas de trabalho.</p>
+        <div class="hero-cta">
+          <a class="btn btn-volt" href="#lista" data-cta="hero">Quero carregar à noite</a>
+          <a class="btn btn-ghost" href="#anfitriao">Tenho uma garagem</a>
+        </div>
+        <p class="hero-note">Pré-lançamento. Quem entra na lista tem prioridade quando abrirmos no seu bairro.</p>
+      </div>
+
+      <div class="night-card" aria-hidden="true">
+        <div class="row"><span class="time">22:00</span><span class="pct">deixa o carro</span></div>
+        <div class="bat"><div class="bat-fill"></div></div>
+        <div class="row"><span class="time">06:00</span><span class="pct">100% de bateria</span></div>
+        <div class="timeline">
+          <div><b>A pé</b>vaga a poucos minutos de casa</div>
+          <div><b>Carga lenta</b>melhor para a bateria</div>
+          <div><b>Energia noturna</b>mais barata</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <div class="container">
+    <div class="sec-head">
+      <span class="label">O problema</span>
+      <h2>Sem garagem, o carro elétrico vira refém do posto rápido</h2>
+      <p>Quem mora em prédio ou em casa sem garagem não consegue carregar em casa. Aí a recarga acontece no meio do expediente.</p>
+    </div>
+    <div class="pains">
+      <article class="pain">
+        <span class="big">30–60 min</span>
+        <h3>parado por dia</h3>
+        <p>Tempo esperando a recarga é tempo sem corrida. No fim do mês, isso vira muitas horas de faturamento perdido.</p>
+      </article>
+      <article class="pain">
+        <span class="big">R$ 2+/kWh</span>
+        <h3>no posto rápido</h3>
+        <p>A recarga rápida pública costuma custar mais que o dobro da energia residencial. A economia do elétrico diminui.</p>
+      </article>
+      <article class="pain">
+        <span class="big">Fila</span>
+        <h3>no horário de pico</h3>
+        <p>Quando todo mundo precisa carregar ao mesmo tempo, o carregador está ocupado e a espera aumenta.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="how">
+  <div class="container">
+    <div class="sec-head">
+      <span class="label">Como funciona</span>
+      <h2>Três passos, e você carrega enquanto dorme</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <span class="n">1</span>
+        <h3>Reserve a noite</h3>
+        <p>No app, escolha uma garagem ou estacionamento verificado a poucos minutos a pé da sua casa. Dá para reservar todas as noites da semana de uma vez.</p>
+      </div>
+      <div class="step">
+        <span class="n">2</span>
+        <h3>Deixe o carro às 22h</h3>
+        <p>Conecte o carro, inicie a recarga pelo app e volte a pé para casa. O anfitrião e o seguro cuidam do resto.</p>
+      </div>
+      <div class="step">
+        <span class="n">3</span>
+        <h3>Retire às 6h com 100%</h3>
+        <p>Pegue o carro carregado e comece o dia rodando. O pagamento sai direto pelo app, só pela energia usada.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container save-grid">
+    <div>
+      <div class="sec-head" style="margin-bottom:24px">
+        <span class="label">Quanto você economiza</span>
+        <h2>Cerca de 30% mais barato que o posto rápido</h2>
+      </div>
+      <ul class="checks">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg><span><b>Nenhuma hora perdida:</b> a recarga acontece enquanto você dorme.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg><span><b>Vaga garantida:</b> reserva recorrente, sem fila e sem surpresa.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg><span><b>Bateria mais saudável:</b> a carga lenta desgasta menos que a rápida todo dia.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg><span><b>Perto de casa:</b> só mostramos vagas que dá para ir a pé.</span></li>
+      </ul>
+    </div>
+    <div class="bars">
+      <span class="label" style="color:var(--ink-2)">Uma noite de recarga (26 kWh, ~200 km)</span>
+      <div class="bar-row">
+        <div class="top"><span>Posto rápido público</span><span>~R$ 57</span></div>
+        <div class="bar"><i class="posto"></i></div>
+      </div>
+      <div class="bar-row">
+        <div class="top"><span>Carga Vizinha</span><span>~R$ 39</span></div>
+        <div class="bar"><i class="cv"></i></div>
+      </div>
+      <p class="fine">Estimativa com BYD Dolphin Mini, posto rápido a R$ 2,20/kWh e Carga Vizinha a R$ 1,50/kWh. Em 26 noites, a diferença passa de R$ 450 por mês.</p>
+    </div>
+  </div>
+</section>
+
+<section class="how">
+  <div class="container">
+    <div class="sec-head">
+      <span class="label">Segurança</span>
+      <h2>Seu carro em mãos verificadas</h2>
+    </div>
+    <div class="trust">
+      <article class="pain">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>Anfitriões verificados</h3>
+        <p>Documento com selfie, antecedentes criminais, comprovante de endereço e vistoria da garagem e da instalação elétrica.</p>
+      </article>
+      <article class="pain">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>Seguro incluso</h3>
+        <p>O carro fica coberto durante todo o período em que está com o anfitrião.</p>
+      </article>
+      <article class="pain">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Avaliação dos dois lados</h3>
+        <p>Depois de cada noite, motorista e anfitrião se avaliam. Quem não cumpre o combinado sai da plataforma.</p>
+      </article>
+    </div>
+    <div class="abroad">
+      <span class="label" style="color:var(--volt)">Já funciona lá fora</span>
+      <p>No Reino Unido, o <strong>Co Charger</strong> já conecta motoristas sem garagem a vizinhos com carregador, principalmente para recarga de pernoite. A Carga Vizinha traz esse modelo para o Brasil, com foco em quem roda por aplicativo.</p>
+    </div>
+  </div>
+</section>
+
+<section class="host" id="anfitriao">
+  <div class="container host-grid">
+    <div>
+      <span class="label">Tem garagem ou estacionamento?</span>
+      <h2>Sua vaga vazia à noite pode virar renda extra</h2>
+      <p>Casas com garagem, estacionamentos, academias e comércios que fecham à noite podem receber carros e ganhar por cada recarga. Você define os horários e aprova cada motorista. Se não tiver carregador, ajudamos a instalar um wallbox e você paga com o que ganhar.</p>
+      <div class="hero-cta"><a class="btn btn-volt" href="#lista" data-cta="host" data-perfil="anfitriao">Quero ser anfitrião</a></div>
+    </div>
+    <div class="earn">
+      <span>Estimativa com 1 vaga, 26 noites por mês</span>
+      <span class="big">~R$ 250/mês</span>
+      <span>de lucro, já descontando a energia e a comissão da plataforma.</span>
+    </div>
+  </div>
+</section>
+
+<section id="lista">
+  <div class="container form-wrap">
+    <div>
+      <div class="sec-head" style="margin-bottom:0">
+        <span class="label">Lista de espera</span>
+        <h2>Seja um dos primeiros no seu bairro</h2>
+        <p>Estamos escolhendo os bairros onde vamos começar. Quanto mais gente de uma região entrar na lista, mais cedo ela abre.</p>
+      </div>
+      <ul class="checks perks">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg><span><b>Prioridade</b> quando abrirmos na sua região</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg><span><b>Condição especial</b> para os primeiros inscritos</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg><span><b>Sem compromisso</b> e sem custo para entrar</span></li>
+      </ul>
+    </div>
+
+    <div class="form-card">
+      <form id="lead-form" novalidate>
+        <fieldset class="field">
+          <legend>Você é</legend>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="perfil" id="perfil-motorista" value="Motorista" checked><span><b>Motorista de app</b><small>quero carregar à noite</small></span></label>
+            <label class="choice"><input type="radio" name="perfil" id="perfil-anfitriao" value="Anfitrião"><span><b>Tenho garagem</b><small>quero oferecer minha vaga</small></span></label>
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label for="nome">Nome</label>
+          <input type="text" id="nome" name="nome" autocomplete="name" required>
+        </div>
+
+        <div class="two">
+          <div class="field">
+            <label for="whatsapp">WhatsApp</label>
+            <input type="tel" id="whatsapp" name="whatsapp" autocomplete="tel" inputmode="tel" placeholder="(11) 90000-0000" required>
+          </div>
+          <div class="field">
+            <label for="email">E-mail <span class="opt">(opcional)</span></label>
+            <input type="email" id="email" name="email" autocomplete="email">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="bairro">Bairro e cidade</label>
+          <input type="text" id="bairro" name="bairro" placeholder="Ex.: Tatuapé, São Paulo" required>
+        </div>
+
+        <div class="field" data-only="Motorista">
+          <label for="carrega">Onde você carrega hoje?</label>
+          <select id="carrega" name="onde_carrega">
+            <option value="">Selecione</option>
+            <option>Posto de recarga rápida</option>
+            <option>Carregador lento público (shopping, mercado)</option>
+            <option>Em casa ou no condomínio</option>
+            <option>Na casa de amigo ou parente</option>
+            <option>Ainda não tenho carro elétrico</option>
+          </select>
+        </div>
+
+        <div class="field" data-only="Motorista">
+          <label for="gasto">Quanto gasta por semana com recarga?</label>
+          <select id="gasto" name="gasto_semanal">
+            <option value="">Selecione</option>
+            <option>Até R$ 100</option>
+            <option>R$ 100 a R$ 200</option>
+            <option>R$ 200 a R$ 300</option>
+            <option>Mais de R$ 300</option>
+            <option>Não sei</option>
+          </select>
+        </div>
+
+        <div class="field" data-only="Anfitrião" hidden>
+          <label for="vaga">Que tipo de vaga você tem?</label>
+          <select id="vaga" name="tipo_vaga">
+            <option value="">Selecione</option>
+            <option>Garagem de casa com tomada comum</option>
+            <option>Garagem de casa com wallbox</option>
+            <option>Estacionamento</option>
+            <option>Comércio ou galpão</option>
+          </select>
+        </div>
+
+        <label class="consent" for="consent">
+          <input type="checkbox" id="consent" name="consentimento" value="sim" required>
+          <span>Concordo em ser contatado pela Carga Vizinha sobre o lançamento. Meus dados não serão compartilhados.</span>
+        </label>
+
+        <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+        <div class="form-msg err" id="form-err" role="alert" hidden></div>
+        <button class="btn btn-volt" type="submit" id="submit-btn">Entrar na lista de espera</button>
+      </form>
+
+      <div class="success" id="success" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M7 12l3.5 3.5L17 9"/></svg>
+        <h3>Você está na lista!</h3>
+        <p>Vamos te chamar no WhatsApp quando a Carga Vizinha abrir no seu bairro. Conhece outro motorista com carro elétrico? Mande este link para ele.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how">
+  <div class="container">
+    <div class="sec-head">
+      <span class="label">Dúvidas</span>
+      <h2>Perguntas frequentes</h2>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>O app já está funcionando?</summary>
+        <p>Ainda não. Estamos em pré-lançamento, medindo o interesse de motoristas e anfitriões para decidir por quais bairros começar. Quem entra na lista agora é avisado primeiro.</p>
+      </details>
+      <details>
+        <summary>Como volto para casa depois de deixar o carro?</summary>
+        <p>A pé. Só mostramos vagas a poucos minutos de caminhada do endereço que você cadastrar.</p>
+      </details>
+      <details>
+        <summary>E se eu precisar do carro no meio da noite?</summary>
+        <p>Você combina a janela de retirada na reserva. Estacionamentos parceiros funcionam 24h, e em garagens residenciais o horário é combinado com o anfitrião.</p>
+      </details>
+      <details>
+        <summary>Como é cobrada a recarga?</summary>
+        <p>Você paga pela energia usada, direto no app. Também vai existir um plano mensal com desconto para quem carrega todas as noites.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <span>© 2026 Carga Vizinha</span>
+    <span>Projeto acadêmico de validação de modelo de negócio · Projetos Empreendedores, Universidade Presbiteriana Mackenzie</span>
+  </div>
+</footer>
+
+<script>
+// Troque pelo e-mail que vai receber os leads (veja o LEIA-ME.md)
+const FORM_EMAIL = "SEU_EMAIL_AQUI";
+
+// Teste A/B do título: ?v=a ou ?v=b no link; sem parâmetro, sorteia e lembra
+const HEADLINES = {
+  a: 'Durma tranquilo. Seu carro acorda com <em>100%</em>.',
+  b: 'Pare de perder <em>1 hora por dia</em> no posto de recarga.'
+};
+const params = new URLSearchParams(location.search);
+let version = (params.get("v") || "").toLowerCase();
+if (!HEADLINES[version]) {
+  try { version = localStorage.getItem("cv_version") || ""; } catch (e) {}
+  if (!HEADLINES[version]) version = Math.random() < 0.5 ? "a" : "b";
+}
+try { localStorage.setItem("cv_version", version); } catch (e) {}
+document.getElementById("headline").innerHTML = HEADLINES[version];
+const origem = params.get("origem") || "direto";
+
+// Mostra as perguntas certas para cada perfil
+const form = document.getElementById("lead-form");
+function syncPerfil() {
+  const perfil = form.perfil.value;
+  form.querySelectorAll("[data-only]").forEach(el => { el.hidden = el.dataset.only !== perfil; });
+}
+form.querySelectorAll('input[name="perfil"]').forEach(r => r.addEventListener("change", syncPerfil));
+document.querySelectorAll('[data-perfil="anfitriao"]').forEach(a => a.addEventListener("click", () => {
+  document.getElementById("perfil-anfitriao").checked = true; syncPerfil();
+}));
+syncPerfil();
+
+const errBox = document.getElementById("form-err");
+function showError(msg) { errBox.textContent = msg; errBox.hidden = false; }
+
+form.addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  errBox.hidden = true;
+  const nome = form.nome.value.trim();
+  const whats = form.whatsapp.value.replace(/\D/g, "");
+  const bairro = form.bairro.value.trim();
+  if (!nome) return showError("Informe seu nome.");
+  if (whats.length < 10) return showError("Informe um WhatsApp com DDD, por exemplo (11) 91234-5678.");
+  if (!bairro) return showError("Informe seu bairro e cidade.");
+  if (!form.consentimento.checked) return showError("Marque a caixa de consentimento para entrar na lista.");
+  if (FORM_EMAIL === "SEU_EMAIL_AQUI") return showError("O formulário ainda não foi configurado. Troque SEU_EMAIL_AQUI no código pelo seu e-mail.");
+
+  const perfil = form.perfil.value;
+  const data = {
+    _subject: `Novo lead Carga Vizinha (${perfil})`,
+    _template: "table",
+    _honey: form._honey.value,
+    perfil, nome,
+    whatsapp: form.whatsapp.value.trim(),
+    email: form.email.value.trim(),
+    bairro,
+    versao_titulo: version.toUpperCase(),
+    origem
+  };
+  if (perfil === "Motorista") {
+    data.onde_carrega = form.onde_carrega.value;
+    data.gasto_semanal = form.gasto_semanal.value;
+  } else {
+    data.tipo_vaga = form.tipo_vaga.value;
+  }
+
+  const btn = document.getElementById("submit-btn");
+  btn.disabled = true; btn.textContent = "Enviando...";
+  try {
+    const res = await fetch(`https://formsubmit.co/ajax/${FORM_EMAIL}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(data)
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || String(json.success) === "false") throw new Error(json.message || "falha");
+    form.hidden = true;
+    document.getElementById("success").hidden = false;
+  } catch (e) {
+    showError("Não conseguimos enviar agora. Verifique sua conexão e tente de novo.");
+    btn.disabled = false; btn.textContent = "Entrar na lista de espera";
+  }
+});
+</script>
+</body>
+</html>
