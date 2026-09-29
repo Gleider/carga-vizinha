@@ -483,7 +483,7 @@ footer .container{display:flex;justify-content:space-between;gap:16px;flex-wrap:
 
 <script>
 // Troque pelo e-mail que vai receber os leads (veja o LEIA-ME.md)
-const FORM_EMAIL = "SEU_EMAIL_AQUI";
+const FORM_EMAIL = "gleider.ec@gmail.com";
 
 // Teste A/B do título: ?v=a ou ?v=b no link; sem parâmetro, sorteia e lembra
 const HEADLINES = {
@@ -525,7 +525,7 @@ form.addEventListener("submit", async (ev) => {
   if (whats.length < 10) return showError("Informe um WhatsApp com DDD, por exemplo (11) 91234-5678.");
   if (!bairro) return showError("Informe seu bairro e cidade.");
   if (!form.consentimento.checked) return showError("Marque a caixa de consentimento para entrar na lista.");
-  if (FORM_EMAIL === "SEU_EMAIL_AQUI") return showError("O formulário ainda não foi configurado. Troque SEU_EMAIL_AQUI no código pelo seu e-mail.");
+  if (FORM_EMAIL === "gleider.ec@gmail.com") return showError("O formulário ainda não foi configurado. Troque SEU_EMAIL_AQUI no código pelo seu e-mail.");
 
   const perfil = form.perfil.value;
   const data = {
