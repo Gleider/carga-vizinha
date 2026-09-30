@@ -31,6 +31,7 @@
   --radius:14px;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:17px;line-height:1.55}
@@ -482,9 +483,8 @@ footer .container{display:flex;justify-content:space-between;gap:16px;flex-wrap:
 </footer>
 
 <script>
-  const WEB3FORMS_KEY = "71ff910e-e01d-496b-a679-25f5564ce98f";
-// Troque pelo e-mail que vai receber os leads (veja o LEIA-ME.md)
-const FORM_EMAIL = "gleider.ec@gmail.com";
+// Chave do Web3Forms: gere em https://web3forms.com (chega no e-mail que vai receber os leads)
+const WEB3FORMS_KEY = "71ff910e-e01d-496b-a679-25f5564ce98f";
 
 // Teste A/B do título: ?v=a ou ?v=b no link; sem parâmetro, sorteia e lembra
 const HEADLINES = {
@@ -526,13 +526,14 @@ form.addEventListener("submit", async (ev) => {
   if (whats.length < 10) return showError("Informe um WhatsApp com DDD, por exemplo (11) 91234-5678.");
   if (!bairro) return showError("Informe seu bairro e cidade.");
   if (!form.consentimento.checked) return showError("Marque a caixa de consentimento para entrar na lista.");
-  if (FORM_EMAIL === "SEU_EMAIL") return showError("O formulário ainda não foi configurado. Troque SEU_EMAIL_AQUI no código pelo seu e-mail.");
+  if (WEB3FORMS_KEY === "COLE_SUA_CHAVE_AQUI") return showError("O formulário ainda não foi configurado. Troque COLE_SUA_CHAVE_AQUI no código pela chave do Web3Forms.");
+  if (form._honey.value) { form.hidden = true; document.getElementById("success").hidden = false; return; }
 
   const perfil = form.perfil.value;
   const data = {
-    _subject: `Novo lead Carga Vizinha (${perfil})`,
-    _template: "table",
-    _honey: form._honey.value,
+    access_key: WEB3FORMS_KEY,
+    subject: `Novo lead Carga Vizinha (${perfil})`,
+    from_name: "Landing page Carga Vizinha",
     perfil, nome,
     whatsapp: form.whatsapp.value.trim(),
     email: form.email.value.trim(),
@@ -550,17 +551,22 @@ form.addEventListener("submit", async (ev) => {
   const btn = document.getElementById("submit-btn");
   btn.disabled = true; btn.textContent = "Enviando...";
   try {
-    const res = await fetch(`https://formsubmit.co/ajax/${FORM_EMAIL}`, {
+    const res = await fetch("https://api.web3forms.com/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
       body: JSON.stringify(data)
     });
     const json = await res.json().catch(() => ({}));
-    if (!res.ok || String(json.success) === "false") throw new Error(json.message || "falha");
+    if (!res.ok || String(json.success) === "false") {
+      const msg = json.message || `Erro ${res.status}`;
+      showError("Não conseguimos enviar. Resposta do servidor: " + msg);
+      btn.disabled = false; btn.textContent = "Entrar na lista de espera";
+      return;
+    }
     form.hidden = true;
     document.getElementById("success").hidden = false;
   } catch (e) {
-    showError("Não conseguimos enviar agora. Verifique sua conexão e tente de novo.");
+    showError("Não conseguimos conectar ao servidor do formulário (" + e.message + "). Verifique sua conexão e tente de novo.");
     btn.disabled = false; btn.textContent = "Entrar na lista de espera";
   }
 });
